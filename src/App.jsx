@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 function App() {
 
@@ -6,15 +6,44 @@ function App() {
   const [suggestions, setSuggestions] = useState([])
 
 
-  useEffect(() => {
+
+
+  function debounce(callback, delay) {
+    let timer;
+    return (value) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        callback(value);
+      }, delay);
+    };
+  }
+
+  const fechData = async (query) => {
+
     if (!query.trim()) {
       setSuggestions([])
       return
     }
-    fetch(`http://localhost:5001/products?search=${query}`)
-      .then(response => response.json())
-      .then(data => setSuggestions(data))
-      .catch(error => console.error(error))
+
+    try {
+      const response = await fetch(`http://localhost:5001/products?search=${query}`)
+      const data = await response.json()
+      setSuggestions(data)
+      console.log("chiamata fatta")
+
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  const debounceFechProduct = useCallback(
+    debounce(fechData, 500)
+    , [])
+
+
+  useEffect(() => {
+
+    debounceFechProduct(query)
 
   }, [query])
 
