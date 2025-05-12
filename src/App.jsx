@@ -4,9 +4,7 @@ function App() {
 
   const [query, setQuery] = useState("")
   const [suggestions, setSuggestions] = useState([])
-
-
-
+  const [selectedProducts, setSelectedProducts] = useState(null)
 
   function debounce(callback, delay) {
     let timer;
@@ -47,6 +45,20 @@ function App() {
 
   }, [query])
 
+  const fechProductsDetails = async (id) => {
+    try {
+      const response = await fetch(`http://localhost:5001/products/${id}`)
+      const data = await response.json()
+      setSelectedProducts(data)
+      setQuery("")
+      setSuggestions([])
+    } catch (error) {
+      console.log(error)
+    }
+
+
+  }
+
 
   return (
     <>
@@ -65,12 +77,27 @@ function App() {
                 {
                   suggestions.map((pro) => {
                     return (
-                      <p key={pro.id}>{pro.name}</p>
+                      <p
+                        key={pro.id}
+                        onClick={() => fechProductsDetails(pro.id)}
+                      >
+                        {pro.name}
+                      </p>
                     )
                   })
                 }
               </div>
             )}
+            {
+              selectedProducts && (
+                <div className='card p-4 m-4'>
+                  <h2>{selectedProducts.name}</h2>
+                  <img src={selectedProducts.image} alt={selectedProducts.name} />
+                  <p>{selectedProducts.description}</p>
+                  <p>{selectedProducts.price}€</p>
+                </div>
+              )
+            }
           </div>
         </div>
       </div>
